@@ -1,15 +1,17 @@
 import { Link, useLocation } from 'react-router-dom';
-import { ShoppingCart, Heart, User, Menu, Search, X } from 'lucide-react';
+import { ShoppingCart, Heart, User, Menu, Search, X, LogIn } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Badge } from '@/components/ui/badge';
 import { useStore } from '@/store/useStore';
+import { useAuth } from '@/hooks/useAuth';
 import { useState } from 'react';
 import { categories } from '@/data/products';
 
 export const Header = () => {
   const location = useLocation();
+  const { user, loading } = useAuth();
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const cartItemCount = useStore((state) => state.getCartItemCount());
@@ -127,11 +129,21 @@ export const Header = () => {
           </Link>
 
           {/* User */}
-          <Link to="/admin">
-            <Button variant="ghost" size="icon">
-              <User className="h-5 w-5" />
-            </Button>
-          </Link>
+          {!loading && (
+            user ? (
+              <Link to="/profile">
+                <Button variant="ghost" size="icon">
+                  <User className="h-5 w-5" />
+                </Button>
+              </Link>
+            ) : (
+              <Link to="/auth">
+                <Button variant="ghost" size="icon">
+                  <LogIn className="h-5 w-5" />
+                </Button>
+              </Link>
+            )
+          )}
         </div>
       </div>
     </header>
