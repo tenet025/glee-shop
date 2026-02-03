@@ -14,7 +14,179 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      order_items: {
+        Row: {
+          color: string | null
+          created_at: string
+          id: string
+          image_url: string | null
+          order_id: string
+          price: number
+          product_id: string
+          product_name: string
+          quantity: number
+          size: string | null
+          variant_sku: string
+        }
+        Insert: {
+          color?: string | null
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          order_id: string
+          price: number
+          product_id: string
+          product_name: string
+          quantity: number
+          size?: string | null
+          variant_sku: string
+        }
+        Update: {
+          color?: string | null
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          order_id?: string
+          price?: number
+          product_id?: string
+          product_name?: string
+          quantity?: number
+          size?: string | null
+          variant_sku?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_items_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      orders: {
+        Row: {
+          created_at: string
+          discount: number | null
+          id: string
+          order_number: string
+          payment_method: string | null
+          shipping: number | null
+          shipping_address: Json
+          status: string
+          subtotal: number
+          total: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          discount?: number | null
+          id?: string
+          order_number: string
+          payment_method?: string | null
+          shipping?: number | null
+          shipping_address: Json
+          status?: string
+          subtotal: number
+          total: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          discount?: number | null
+          id?: string
+          order_number?: string
+          payment_method?: string | null
+          shipping?: number | null
+          shipping_address?: Json
+          status?: string
+          subtotal?: number
+          total?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          email: string | null
+          full_name: string | null
+          id: string
+          phone: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          email?: string | null
+          full_name?: string | null
+          id?: string
+          phone?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          email?: string | null
+          full_name?: string | null
+          id?: string
+          phone?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      shipping_addresses: {
+        Row: {
+          city: string
+          country: string
+          created_at: string
+          full_name: string
+          id: string
+          is_default: boolean | null
+          phone: string | null
+          postal_code: string
+          state: string
+          street_address: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          city: string
+          country?: string
+          created_at?: string
+          full_name: string
+          id?: string
+          is_default?: boolean | null
+          phone?: string | null
+          postal_code: string
+          state: string
+          street_address: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          city?: string
+          country?: string
+          created_at?: string
+          full_name?: string
+          id?: string
+          is_default?: boolean | null
+          phone?: string | null
+          postal_code?: string
+          state?: string
+          street_address?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

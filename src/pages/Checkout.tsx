@@ -9,6 +9,8 @@ import { Separator } from '@/components/ui/separator';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { useStore } from '@/store/useStore';
+import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/integrations/supabase/client';
 import { products } from '@/data/products';
 import { toast } from 'sonner';
 import { CreditCard, Truck, ShieldCheck, ArrowLeft } from 'lucide-react';
@@ -31,6 +33,7 @@ type AddressFormData = z.infer<typeof addressSchema>;
 
 const Checkout = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const { cart, getCartTotal, clearCart } = useStore();
   const { subtotal, discount, shipping, total } = getCartTotal();
   const [paymentMethod, setPaymentMethod] = useState('card');
@@ -83,24 +86,72 @@ const Checkout = () => {
 
     setIsProcessing(true);
     
-    // Simulate payment processing
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-    
-    // Generate order number
-    const orderNumber = `ORD-${Date.now().toString(36).toUpperCase()}`;
-    
-    // Clear cart and navigate to confirmation
-    clearCart();
-    navigate('/order-confirmation', { 
-      state: { 
-        orderNumber,
-        total,
-        email: formData.email,
-        address: formData,
-      } 
-    });
-    
-    toast.success('Order placed successfully!');
+    try {
+      // Generate order number
+      const orderNumber = `ORD-${Date.now().toString(36).toUpperCase()}`;
+      
+      // Save order to database if user is logged in
+      if (user) {
+        const { data: orderData, error: orderError } = await supabase
+          .from('orders')
+          .insert({
+            user_id: user.id,
+            order_number: orderNumber,
+            status: 'processing',
+            subtotal,
+            discount,
+            shipping,
+            total,
+            shipping_address: formData,
+            payment_method: paymentMethod,
+          })
+          .select()
+          .single();
+
+        if (orderError) {
+          throw orderError;
+        }
+
+        // Save order items
+        const orderItemsToInsert = cartItems.map((item) => ({
+          order_id: orderData.id,
+          product_id: item.productId,
+          product_name: item.product?.name || '',
+          variant_sku: item.variantSku,
+          color: item.color,
+          size: item.size,
+          quantity: item.quantity,
+          price: item.variant?.price || 0,
+          image_url: item.variant?.image || '',
+        }));
+
+        const { error: itemsError } = await supabase
+          .from('order_items')
+          .insert(orderItemsToInsert);
+
+        if (itemsError) {
+          throw itemsError;
+        }
+      }
+
+      // Clear cart and navigate to confirmation
+      clearCart();
+      navigate('/order-confirmation', { 
+        state: { 
+          orderNumber,
+          total,
+          email: formData.email,
+          address: formData,
+        } 
+      });
+      
+      toast.success('Order placed successfully!');
+    } catch (error) {
+      console.error('Order error:', error);
+      toast.error('Failed to place order. Please try again.');
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   if (cart.length === 0) {
